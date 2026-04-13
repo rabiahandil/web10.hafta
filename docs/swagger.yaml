@@ -1,0 +1,461 @@
+definitions:
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  handlers.LoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.QuizSubmission:
+    properties:
+      answers:
+        additionalProperties:
+          type: string
+        description: question_id -> answer
+        type: object
+    type: object
+  handlers.RegisterInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      role:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  models.Course:
+    properties:
+      category:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      id:
+        type: integer
+      lessons:
+        items:
+          $ref: '#/definitions/models.Lesson'
+        type: array
+      teacher:
+        $ref: '#/definitions/models.User'
+      teacher_id:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.Lesson:
+    properties:
+      content:
+        type: string
+      course_id:
+        type: integer
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      order:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+      video_url:
+        type: string
+    type: object
+  models.Question:
+    properties:
+      correct:
+        description: A, B, C, D
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      option_a:
+        type: string
+      option_b:
+        type: string
+      option_c:
+        type: string
+      option_d:
+        type: string
+      quiz_id:
+        type: integer
+      text:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.Quiz:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      lesson_id:
+        type: integer
+      questions:
+        items:
+          $ref: '#/definitions/models.Question'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        description: student, teacher
+        type: string
+      updatedAt:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Uzaktan eğitim platformu backend API'si.
+  title: GoLearn API
+  version: "1.0"
+paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user and get JWT
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Register a new user
+      tags:
+      - auth
+  /api/courses:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: Sort by field (e.g. title, created_at)
+        in: query
+        name: sort
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List courses with pagination and filtering
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Course'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Course'
+      security:
+      - BearerAuth: []
+      summary: Create a new course
+      tags:
+      - courses
+  /api/courses/{id}:
+    delete:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a course
+      tags:
+      - courses
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+      security:
+      - BearerAuth: []
+      summary: Get course details
+      tags:
+      - courses
+    put:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Course'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+      security:
+      - BearerAuth: []
+      summary: Update an existing course
+      tags:
+      - courses
+  /api/courses/{id}/lessons:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Lesson'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List lessons of a course
+      tags:
+      - lessons
+    post:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Lesson details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Lesson'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Lesson'
+      security:
+      - BearerAuth: []
+      summary: Add a new lesson to a course
+      tags:
+      - lessons
+  /api/lessons/{id}/complete:
+    post:
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Mark a lesson as completed
+      tags:
+      - progress
+  /api/lessons/{id}/quiz:
+    get:
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Quiz'
+      security:
+      - BearerAuth: []
+      summary: Get quiz details by lesson ID
+      tags:
+      - quizzes
+    post:
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Quiz details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Quiz'
+      responses:
+        "21":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Quiz'
+      security:
+      - BearerAuth: []
+      summary: Create a quiz for a lesson
+      tags:
+      - quizzes
+  /api/my/progress:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get progress of all enrolled courses
+      tags:
+      - progress
+  /api/quiz/{id}/submit:
+    post:
+      parameters:
+      - description: Quiz ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Answers map
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.QuizSubmission'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Submit quiz answers and get score
+      tags:
+      - quizzes
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

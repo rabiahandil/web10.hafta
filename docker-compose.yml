@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  golearn:
+    build: .
+    ports:
+      - "8090:8090"
+    volumes:
+      - golearn_data:/root/
+    environment:
+      - PORT=8090
+      - JWT_SECRET=golearn_very_secret_key_123
+      - DB_PATH=golearn.db
+
+volumes:
+  golearn_data:
