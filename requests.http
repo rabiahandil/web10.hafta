@@ -1,0 +1,126 @@
+# GoLearn API Test Senaryoları
+# Bu dosya 'REST Client' eklentisi ile uyumludur.
+
+@baseUrl = http://localhost:8090/api
+@token = {{login.response.body.token}}
+
+### 1. ÖĞRETMEN KAYDI
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "name": "Rabia Handil",
+    "email": "rabia@golearn.com",
+    "password": "password123",
+    "role": "teacher"
+}
+
+### 2. ÖĞRENCİ KAYDI
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "name": "Ahmet Öğrenci",
+    "email": "ahmet@student.com",
+    "password": "password123",
+    "role": "student"
+}
+
+### 3. GİRİŞ YAP (TOKEN AL)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "rabia@golearn.com",
+    "password": "password123"
+}
+
+### 4. KURS OLUŞTUR (SADECE TEACHER)
+POST {{baseUrl}}/courses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Go ile Mikroservis Geliştirme",
+    "description": "Golang ve Gin kullanarak uçtan uca API geliştirme eğitimi.",
+    "category": "Yazılım"
+}
+
+### 5. KURSLARI LİSTELE (SAYFALAMA VE FİLTRELEME)
+GET {{baseUrl}}/courses?page=1&limit=5&category=Yazılım
+Authorization: Bearer {{token}}
+
+### 6. KURS DETAYI GETİR
+GET {{baseUrl}}/courses/1
+Authorization: Bearer {{token}}
+
+### 7. DERSE DERS EKLE
+POST {{baseUrl}}/courses/1/lessons
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Gin Framework Temelleri",
+    "content": "Bu derste Gin router yapısını öğreneceğiz.",
+    "video_url": "https://youtube.com/example",
+    "order": 1
+}
+
+### 8. DERSLERİ LİSTELE
+GET {{baseUrl}}/courses/1/lessons
+Authorization: Bearer {{token}}
+
+### 9. QUIZ OLUŞTUR
+POST {{baseUrl}}/lessons/1/quiz
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "questions": [
+        {
+            "text": "Go dilinin yaratıcısı kimdir?",
+            "option_a": "Google",
+            "option_b": "Microsoft",
+            "option_c": "Apple",
+            "option_d": "Meta",
+            "correct": "A"
+        },
+        {
+            "text": "Gin nedir?",
+            "option_a": "Veritabanı",
+            "option_b": "Web Framework",
+            "option_c": "OS",
+            "option_d": "Donanım",
+            "correct": "B"
+        }
+    ]
+}
+
+### 10. QUIZ DETAYI GETİR
+GET {{baseUrl}}/lessons/1/quiz
+Authorization: Bearer {{token}}
+
+### 11. QUIZ ÇÖZ (SUBMIT)
+POST {{baseUrl}}/quiz/1/submit
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "answers": {
+        "1": "A",
+        "2": "B"
+    }
+}
+
+### 12. DERSİ TAMAMLANDI OLARAK İŞARETLE
+POST {{baseUrl}}/lessons/1/complete
+Authorization: Bearer {{token}}
+
+### 13. KENDİ İLERLEMENİ GÖR
+GET {{baseUrl}}/my/progress
+Authorization: Bearer {{token}}
+
+### 14. KURS SİL (SADECE SAHİBİ)
+DELETE {{baseUrl}}/courses/1
+Authorization: Bearer {{token}}
