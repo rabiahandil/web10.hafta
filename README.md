@@ -1,5 +1,12 @@
 # GoLearn - Uzaktan Eğitim Platformu API
 
+**Öğrenci Bilgileri:**
+- **Ad Soyad:** Rabia Handil
+- **Okul Numarası:** 24080410008
+
+---
+
+
 GoLearn, öğretmenlerin kurs ve içerik oluşturabildiği, öğrencilerin ise bu kurslara katılıp ilerlemelerini takip edebildiği modern bir backend API projesidir.
 
 ## Özellikler
